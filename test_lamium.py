@@ -2,7 +2,7 @@ from lamium import Session, Location, Resource, Unit
 from mock import Mock
 import requests_mock
 from six.moves.urllib import parse as urlsplit
-
+import six
 
 class BaseTest(object):
 
@@ -37,7 +37,8 @@ class TestUnit(BaseTest):
     def test_str_unicode(self):
         unit = Unit(Session(), 'http://www.sixtyten.org/')
         assert str(unit) == 'http://www.sixtyten.org/'
-        assert unicode(unit) == 'http://www.sixtyten.org/'
+        if six.PY2:
+            assert unicode(unit) == u'http://www.sixtyten.org/'
 
     def test_repr(self):
         unit = Unit(Session(), 'http://www.sixtyten.org/')
