@@ -4,6 +4,7 @@ import requests_mock
 from six.moves.urllib import parse as urlsplit
 import six
 
+
 class BaseTest(object):
 
     # I feel a little bad for using
