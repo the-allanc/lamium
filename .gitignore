@@ -1,7 +1,9 @@
-syntax: glob
-docs/_build/*
-*.pyc
 .cache
 .coverage
+.eggs
+.idea
 .tox
 *.egg-info
+*.pyc
+build
+dist
