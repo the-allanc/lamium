@@ -107,6 +107,12 @@ class BaseResource(Unit):
         return self.__session__.at(self.__url__)
 
 
+class BaseSession(object):
+
+    __location_delegates__ = 'DELETE GET HEAD PATCH POST PUT'.split()
+    resource_class = BaseResource
+
+
 class Resource(BaseResource):
 
     # aping tortilla here.
@@ -171,11 +177,6 @@ class Resource(BaseResource):
 
         return content, options
 
-
-class BaseSession(object):
-
-    __location_delegates__ = 'DELETE GET HEAD PATCH POST PUT'.split()
-    resource_class = BaseResource
 
 class Session(BaseSession):
 
