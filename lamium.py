@@ -64,21 +64,12 @@ class Location(Unit):
         return self.__session__.at(self.__url__)
 
     def __getattr__(self, name):
+        if name in self.__session__.__location_delegates__:
+            return getattr(self.as_resource, name)
         if name.startswith('__') and name.endswith('__'):
             raise AttributeError("%r: %s" % (self, name))
         return self(name)
 
-
-# Build properties for these methods which just delegate to the Resource
-# implementation.
-def _location_delegate_to_res(methname):
-    def delegated_method(self):
-        return getattr(self.as_resource, methname)
-    return delegated_method
-for name in ('DELETE GET HEAD PATCH POST PUT '
-    'delete get patch post put').split():
-    setattr(Location, name, property(_location_delegate_to_res(name)))
-del _location_delegate_to_res
 
 _NOTGIVEN = object()
 
@@ -161,8 +152,13 @@ class Resource(Unit):
     def raise_for_status(self, response):
         raise self.exceptions.exception_for_code(response.status_code)(response)
 
-class Session(object):
+class BaseSession(object):
 
+    __location_delegates__ = 'DELETE GET HEAD PATCH POST PUT'.split()
+
+class Session(BaseSession):
+
+    __location_delegates__ = BaseSession.__location_delegates__ + 'delete get patch post put'.split()
     resource_class = Resource
 
     USER_AGENT = 'lamium/%s python-requests/%s' % (
@@ -272,10 +268,10 @@ class exceptions(object):
     class Gone(ClientError): pass
     class ServerError(ErrorResponse): pass
     Timeout = requests.exceptions.Timeout
-    
+
     @classmethod
     def exception_for_code(cls, code):
-        
+
         # Do we have a specific class for this code?
         exc_class = {
             400: cls.BadRequest,
@@ -286,14 +282,14 @@ class exceptions(object):
             409: cls.Conflict,
             410: cls.Gone,
         }.get(code, None)
-        
+
         # If not, try something a bit more generic.
         if exc_class is None:
             exc_class = {
                 4: cls.ClientError,
                 5: cls.ServerError,
             }.get(code // 100, None)
-            
+
         return exc_class or cls.ErrorResponse
 
 Session.exceptions = Resource.exceptions = exceptions
