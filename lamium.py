@@ -5,7 +5,6 @@ __all__ = [
 ]
 
 import requests
-import requests.auth
 import requests.exceptions
 import six
 from six.moves.urllib import parse as urlparse
@@ -112,6 +111,9 @@ class BaseSession(object):
     __location_delegates__ = 'DELETE GET HEAD PATCH POST PUT'.split()
     resource_class = BaseResource
 
+    def __init__(self, session=None):
+        self.req_session = session or requests.Session()
+
 
 class Resource(BaseResource):
 
@@ -183,37 +185,8 @@ class Session(BaseSession):
     __location_delegates__ = BaseSession.__location_delegates__ + 'delete get patch post put'.split()
     resource_class = Resource
 
-    USER_AGENT = 'lamium/%s python-requests/%s' % (
-        __version__, requests.__version__)
-
-    def __init__(self, session=None, auth=None, timeout=None, headers=None, user_agent=None):
-        self.req_session = session or requests.Session()
-
-        # We wrap it in a BasicAuth object to avoid potentially exposing the
-        # password in tracebacks (such as when extra data is exposed via cgitb).
-        if isinstance(auth, (tuple, list)):
-            auth = requests.auth.HTTPBasicAuth(*auth)
-        if auth:
-            self.req_session.auth = auth
-
-        # Prepare the default headers we use.
-        if user_agent:
-            self.req_session.headers['User-Agent'] = user_agent
-        else:
-            self.req_session.headers.setdefault('User-Agent', self.USER_AGENT)
-
-        if headers:
-            self.req_session.headers.update(headers)
-
-        # We can't set the default timeout for a session, so we'll handle it
-        # ourselves.
-        self._default_timeout = None
-
     def request(self, method, url, **kwargs):
 
-        # If timeout is passed, and it is None, make sure it doesn't
-        # override the default timeout.
-        kwargs.setdefault('timeout', self._default_timeout)
         try:
             return self.req_session.request(method, url, **kwargs)
         except requests.exceptions.Timeout:
