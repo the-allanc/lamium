@@ -123,18 +123,18 @@ class Resource(BaseResource):
             raise
 
     def post(self, *args, **kwargs):
-        content, options = _format_exc_args(args, kwargs)
+        content, options = self._process_parameters(args, kwargs)
         return self.send_content('POST', content, **options)
 
     def delete(self, **kwargs):
         return self.load_response(self.DELETE(**kwargs))
 
     def patch(self, *args, **kwargs):
-        content, options = _format_exc_args(args, kwargs)
+        content, options = self._process_parameters(args, kwargs)
         return self.send_content('PATCH', content, **options)
 
     def put(self, *args, **kwargs):
-        content, options = _format_exc_args(args, kwargs)
+        content, options = self._process_parameters(args, kwargs)
         return self.send_content('PUT', content, **options)
 
     def request(self, method, data=None, **kwargs):
@@ -154,6 +154,23 @@ class Resource(BaseResource):
 
     def raise_for_status(self, response):
         raise self.exceptions.exception_for_code(response.status_code)(response)
+
+    def _process_parameters(self, args, kwargs):
+        # What is the content we are going to send? If we use positional
+        # arguments, then there should only be one, and all keyword arguments
+        # are options to determine how we handle the request.
+        if args:
+            if len(args) == 1:
+                content = args[0]
+                options = kwargs
+            else:
+                raise ValueError('too many positional arguments for method')
+        else:
+            content = kwargs
+            options = {}
+
+        return content, options
+
 
 class BaseSession(object):
 
@@ -301,20 +318,3 @@ Session.exceptions = Resource.exceptions = exceptions
 #
 # Exception handling.
 #
-
-
-def _format_exc_args(args, kwargs):
-    # What is the content we are going to send? If we use positional
-    # arguments, then there should only be one, and all keyword arguments
-    # are options to determine how we handle the request.
-    if args:
-        if len(args) == 1:
-            content = args[0]
-            options = kwargs
-        else:
-            raise ValueError('too many positional arguments for method')
-    else:
-        content = kwargs
-        options = {}
-
-    return content, options
