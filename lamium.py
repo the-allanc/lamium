@@ -16,8 +16,8 @@ class Unit(object):
     to be inherited directly outside of this module.'''
 
     def __init__(self, session, url):
-        if not (hasattr(session, 'request') and not isinstance(session, Unit)):
-            err = 'session must be a Session object, not %s' % type(session)
+        if not (isinstance(session, BaseSession)):
+            err = 'session must be a Lamium session object, not %s' % type(session)
             raise ValueError(err)
         if not isinstance(url, six.string_types):
             err = 'url must be a string type, not %s' % type(url)
@@ -73,7 +73,7 @@ class Location(Unit):
 
 _NOTGIVEN = object()
 
-class Resource(Unit):
+class BaseResource(Unit):
 
     @property
     def URL(self):
@@ -105,6 +105,9 @@ class Resource(Unit):
 
     def at(self, url):
         return self.__session__.at(self.__url__)
+
+
+class Resource(BaseResource):
 
     # aping tortilla here.
     def get(self, *args, **kwargs): # what about notfound=?
@@ -155,6 +158,7 @@ class Resource(Unit):
 class BaseSession(object):
 
     __location_delegates__ = 'DELETE GET HEAD PATCH POST PUT'.split()
+    resource_class = BaseResource
 
 class Session(BaseSession):
 
