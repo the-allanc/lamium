@@ -125,7 +125,7 @@ class Resource(BaseResource):
         notfound = kwargs.pop('notfound', _NOTGIVEN)
         try:
             return self.load_response(self.GET(**kwargs))
-        except (self.NotFound, self.Gone):
+        except (self.exceptions.NotFound, self.exceptions.Gone):
             if notfound is not _NOTGIVEN:
                 return notfound
             raise
