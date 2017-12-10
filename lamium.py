@@ -1,7 +1,7 @@
 __version__ = '0.1'
 
 __all__ = [
-    'Resource', 'Location', 'Session', 'exceptions',
+    'Resource', 'URL', 'Session', 'exceptions',
 ]
 
 import requests
@@ -53,18 +53,18 @@ class Unit(object):
         return repr_me
 
 
-class Location(Unit):
+class URL(Unit):
 
     '''Lightweight object used for easy construction of URLs, which can then
        be easily turned into a Resource object.'''
 
     @property
-    def as_resource(self):
+    def deURL(self):
         return self.__session__.at(self.__url__)
 
     def __getattr__(self, name):
         if name in self.__session__.__location_delegates__:
-            return getattr(self.as_resource, name)
+            return getattr(self.deURL, name)
         if name.startswith('__') and name.endswith('__'):
             raise AttributeError("%r: %s" % (self, name))
         return self(name)
@@ -76,7 +76,7 @@ class BaseResource(Unit):
 
     @property
     def URL(self):
-        return Location(self.__session__, self.__url__)
+        return URL(self.__session__, self.__url__)
 
     def GET(self, **kwargs):
         '''Calls requests.get with the URL of this resource.'''

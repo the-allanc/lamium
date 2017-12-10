@@ -1,4 +1,4 @@
-from lamium import Session, Location, Resource, Unit
+from lamium import Session, URL, Resource, Unit
 from mock import MagicMock
 import requests_mock
 from six.moves.urllib import parse as urlsplit
@@ -46,20 +46,20 @@ class TestUnit(BaseTest):
         assert repr(unit) == '<Unit http://www.sixtyten.org/>'
 
 
-class TestLocation(BaseTest):
+class TestURL(BaseTest):
 
     def test_location_chaining(self):
         s = Session()
-        here = Location(s, 'http://sixtyten.org/')
+        here = URL(s, 'http://sixtyten.org/')
         there42 = here.there(42)
-        assert isinstance(there42, Location)
+        assert isinstance(there42, URL)
         assert there42.__url__ == 'http://sixtyten.org/there/42'
 
     def test_get_GET_proxying(self):
         s = Session()
         docproxy = MagicMock(spec=Session)
         s.resource_class.return_value=docproxy
-        l = Location(s, 'http://sixtyten.org/mydoc/')
+        l = URL(s, 'http://sixtyten.org/mydoc/')
 
         #l.get(myparam=True)
         #docproxy.get.assert_called_once_with(myparam=True)
@@ -76,7 +76,7 @@ class TestResource(BaseTest):
     def test_url(self):
         s = Session()
         r = Resource(s, 'http://sixtyten.org/documents/43/')
-        assert isinstance(r.URL, Location)
+        assert isinstance(r.URL, URL)
         assert r.URL.__url__ == r.__url__
 
     def test_VERB_methods(self):
