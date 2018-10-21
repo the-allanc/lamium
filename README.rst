@@ -50,8 +50,8 @@ Here's what the current example from Hammock looks like in Lamium:
 
     >>> from lamium import Session
     >>> github = Session().at('https://api.github.com').URL
-    >>> resp = github.repos('kadirpekel', 'hammock').matchers.GET()
-    >>> for watcher in resp.json: print watcher.get('login')
+    >>> resp = github.repos('kadirpekel', 'hammock').watchers.GET()
+    >>> watchers = [watcher.get('login') for watcher in resp.json()]
 
 You can browse the source code and file bug reports at the project repository_. Full documentation can be found `here`__.
 
