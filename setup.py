@@ -28,9 +28,6 @@ def get_description():
 
 
 name = get_definition('.. |name| replace:: ')
-url = get_definition('.. _repository: ')
-summary = get_definition('.. |summary| replace:: ')
-description = get_description()
 
 #
 # End extraction code.
@@ -41,10 +38,10 @@ params = dict(
     use_scm_version=True,
     author="Allan Crooks",
     author_email="allan@increment.one",
-    description=summary or name,
-    long_description=description,
+    description=get_definition('.. |summary| replace:: '),
+    long_description=get_description(),
     license='MIT',
-    url=url,
+    url=get_definition('.. _repository: '),
     keywords=[],
     py_modules=['lamium'],
     include_package_data=True,
@@ -59,15 +56,27 @@ params = dict(
         'testing': [
             'mock',
             'requests_mock',
-            'pytest>=2.8',
-            'pytest-sugar',
+            'pytest>=3.5',
+            'pytest-sugar>=0.9.1',
+            'collective.checkdocs',
+            'pytest-cov',
+            'pylint',
         ],
         'docs': [
             'sphinx',
             'jaraco.packaging>=3.2',
             'rst.linker>=1.9',
             'allanc-sphinx[yeen]>=0.2',
-            'collective.checkdocs',
+        ],
+        'lint': [
+            'flake8',
+            'radon',
+            'pylint',
+        ],
+        'manage': [
+            'bump2version>=0.5.6',
+            'tox>=2.4',
+            'pip-tools',
         ],
     },
     setup_requires=[

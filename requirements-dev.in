@@ -1,0 +1,6 @@
+# This is a fork of pycodestyle which backports a commit that checks max-doc-length,
+# but is still compatible with flake8 3.5.0.
+-e git+git://github.com/the-allanc/pycodestyle@2a89f8643790efee043ea01b310ff519c888ff9a#egg=pycodestyle
+
+-r requirements.txt # SKELETON: Remove if not an application.
+-e .[manage,docs,testing,lint]

@@ -1,32 +1,45 @@
 language: python
 python:
 - 2.7
-- 3.6
+- &latest_py3 3.6
 # Check that all template lines from the skeleton project have been removed.
 #   Do NOT remove this when customising your project.
 before_install: ['! grep -R SKELETON | grep -v grep']
 install:
 - pip install -r requirements-dev.txt
-- pip install coveralls pytest-cov
+- pip install coveralls tox tox-travis
 script:
-- python setup.py checkdocs
-- py.test --cov lamium
-- sphinx-build -W docs/ build/docs/
-- pylint --disable=W lamium.py
-after_script:
-- flake8
-- pylint lamium.py
+- tox
 branches:
   except:
   - skeleton
-deploy:
-  provider: pypi
-  server: https://upload.pypi.org/legacy/
-  on:
-    tags: true
-    all_branches: true
-  user: amc6010
-  # supply password with `travis encrypt --add deploy.password`
-  distributions: dists
+jobs:
+  include:
+  - stage: build-docs
+    python: *latest_py3
+    install: pip install tox
+    script: tox -e docs
+  - stage: deploy
+    if: tag IS present
+    python: *latest_py3
+    provider: pypi
+    server: https://upload.pypi.org/legacy/
+    on:
+      tags: true
+      all_branches: true
+    user: amc6010
+    # supply password with `travis encrypt --add deploy.password`
+    distributions: dists
+  - stage: lint-check
+    python: *latest_py3
+    install: pip install tox
+    script: skip
+    after_script: tox -e lint
 after_success:
 - coveralls
+cache: pip
+before_script:
+  # Disable IPv6. Ref travis-ci/travis-ci#8361
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+      sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6';
+    fi
