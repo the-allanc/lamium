@@ -28,7 +28,7 @@ filelock==3.0.9           # via tox
 flake8-polyfill==1.0.2    # via radon
 flake8==3.5.0             # via flake8-polyfill
 funcsigs==1.0.2           # via mock, pytest
-futures==3.2.0            # via isort
+futures==3.2.0 ; python_version == "2.7"
 idna==2.7                 # via requests
 imagesize==1.1.0          # via sphinx
 isort==4.3.4              # via pylint

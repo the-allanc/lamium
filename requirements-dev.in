@@ -2,4 +2,5 @@
 # but is still compatible with flake8 3.5.0.
 -e git+git://github.com/the-allanc/pycodestyle@2a89f8643790efee043ea01b310ff519c888ff9a#egg=pycodestyle
 
+futures; python_version=="2.7" # Needed to allow pylint to run in Python 2 and Python 3.
 -e .[manage,docs,testing,lint]
