@@ -8,22 +8,27 @@
 -e git+git://github.com/the-allanc/pycodestyle@2a89f8643790efee043ea01b310ff519c888ff9a#egg=pycodestyle
 alabaster==0.7.12         # via sphinx
 allanc-sphinx[yeen]==0.2
-astroid==2.0.4            # via pylint
+astroid==1.6.5            # via pylint
 atomicwrites==1.2.1       # via pytest
 attrs==18.2.0             # via pytest
 babel==2.6.0              # via sphinx
+backports.functools-lru-cache==1.5  # via astroid, pylint
 bump2version==0.5.10
 certifi==2018.10.15       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via pip-tools
 collective.checkdocs==0.2
 colorama==0.3.9           # via radon
+configparser==3.5.0       # via flake8, pylint
 coverage==4.5.1           # via pytest-cov
 crookbook==0.0.6
 docutils==0.14            # via collective.checkdocs, sphinx, sphinxjp.themecore, sphinxjp.themes.trstyle
+enum34==1.1.6             # via astroid, flake8
 filelock==3.0.9           # via tox
 flake8-polyfill==1.0.2    # via radon
 flake8==3.5.0             # via flake8-polyfill
+funcsigs==1.0.2           # via mock, pytest
+futures==3.2.0            # via isort
 idna==2.7                 # via requests
 imagesize==1.1.0          # via sphinx
 isort==4.3.4              # via pylint
@@ -43,7 +48,7 @@ pluggy==0.8.0             # via pytest, tox
 py==1.7.0                 # via pytest, tox
 pyflakes==1.6.0           # via flake8
 pygments==2.2.0           # via sphinx
-pylint==2.1.1
+pylint==1.9.3
 pyparsing==2.2.2          # via packaging
 pytest-cov==2.6.0
 pytest-sugar==0.9.1
@@ -54,7 +59,9 @@ radon==2.4.0
 requests-mock==1.5.2
 requests==2.20.0          # via requests-mock, sphinx
 rst.linker==1.10
-six==1.11.0               # via astroid, crookbook, jaraco.packaging, mando, mock, more-itertools, packaging, pathlib2, pip-tools, pytest, python-dateutil, requests-mock, rst.linker, sphinx, tox
+scandir==1.9.0            # via pathlib2
+singledispatch==3.4.0.3   # via astroid, pylint
+six==1.11.0               # via astroid, crookbook, jaraco.packaging, mando, mock, more-itertools, packaging, pathlib2, pip-tools, pylint, pytest, python-dateutil, requests-mock, rst.linker, singledispatch, sphinx, tox
 snowballstemmer==1.2.1    # via sphinx
 sphinx==1.8.1             # via sphinxjp.themecore, sphinxjp.themes.trstyle
 sphinxcontrib-websupport==1.1.0  # via sphinx
@@ -63,7 +70,7 @@ sphinxjp.themes.trstyle==0.1.1  # via allanc-sphinx
 termcolor==1.1.0          # via pytest-sugar
 toml==0.10.0              # via tox
 tox==3.5.2
-typed-ast==1.1.0          # via astroid
+typing==3.6.6             # via sphinx
 urllib3==1.24             # via requests
 virtualenv==16.0.0        # via tox
 wrapt==1.10.11            # via astroid
