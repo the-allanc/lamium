@@ -4,11 +4,13 @@ __all__ = [
     'Resource', 'URL', 'Session', 'exceptions',
 ]
 
+import crookbook
 import requests
 import requests.exceptions
 import six
 from six.moves.urllib import parse as urlparse
 
+@crookbook.described('for {0.__url__}')
 class Unit(object):
 
     '''Base class where common Lamium objects share code - not intended
@@ -38,21 +40,10 @@ class Unit(object):
         return self.__class__(self.__session__, url)
 
     def __str__(self):
-        str_url = self.__url__
-        if six.PY2 and isinstance(str_url, unicode):
-            str_url = str_url.encode('utf-8')
-        return str_url
-
-    def __unicode__(self):
-        return unicode(self.__url__)
-
-    def __repr__(self):
-        repr_me = '<{0.__class__.__name__} {0.__url__}>'.format(self)
-        if six.PY2 and isinstance(repr_me, unicode):
-            repr_me = repr_me.encode('utf-8', errors='ignore')
-        return repr_me
+        return self.__url__
 
 
+@crookbook.essence('__session__ __url__', mutable=False)
 class URL(Unit):
 
     '''Lightweight object used for easy construction of URLs, which can then

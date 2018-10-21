@@ -43,7 +43,7 @@ class TestUnit(BaseTest):
 
     def test_repr(self):
         unit = Unit(Session(), 'http://www.sixtyten.org/')
-        assert repr(unit) == '<Unit http://www.sixtyten.org/>'
+        assert repr(unit) == '<Unit for http://www.sixtyten.org/>'
 
 
 class TestURL(BaseTest):
