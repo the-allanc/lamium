@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements-dev.txt requirements-dev.in
 #
--e file:///home/clova/Downloads/lamium
+-e .
 -e git+git://github.com/the-allanc/pycodestyle@2a89f8643790efee043ea01b310ff519c888ff9a#egg=pycodestyle
 alabaster==0.7.12         # via sphinx
 allanc-sphinx[yeen]==0.2
