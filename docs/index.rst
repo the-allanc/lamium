@@ -20,13 +20,13 @@ Here's a very basic example of a Session which will automatically decode json fr
     ...         return Resource.send_content(method, content, headers=headers, **kwargs)
     ...
     ...     def load_response(self, response):
-    ...         result = Resource.load_response(response)
+    ...         result = Resource.load_response(self, response)
     ...         if isinstance(result, Response):
     ...             result = result.json()
     ...         return result
     ...
     >>> json_session = Session(resource_class=JSONResource)
-    >>> httpbin = json_session.at('http://httpbin.org')
+    >>> httpbin = json_session.at('https://httpbin.org')
     >>> post_url = httpbin('post')
     >>>
     >>> # Interpret keyword parameters as the content to send.
@@ -34,8 +34,8 @@ Here's a very basic example of a Session which will automatically decode json fr
     >>>
     >>> # httpbin should echo what we've posted and confirm that the data was
     >>> # JSON encoded.
-    >>> print(result)
-    {'a': 1, 'b': 2, 'c': 'd'}
+    >>> result['json'] == {'a': 1, 'b': 2, 'c': 'd'}
+    True
 
 
 If you set up a session like this, and then found a resource which didn't use JSON, then you can call the uppercase methods to bypass this behaviour and use requests API instead (you can handle the request encoding and response decoding manually). If you have a resource which accepts JSON, but sometimes generates a response which you wouldn't be able to decode (perhaps doesn't return JSON in response), then you could make a call like this:
