@@ -64,6 +64,7 @@ class URL(Unit):
             raise AttributeError("%r: %s" % (self, name))
         return self(name)
 
+
 _verb_func = '''
 def {0}(self, *args, **kwargs):
     """Alias for session.{0} which passes the URL of this object as the
@@ -71,20 +72,14 @@ def {0}(self, *args, **kwargs):
     return self.request("{0}", *args, **kwargs)
 '''
 
-_verb_nobody_func = '''
-def {0}(self, **kwargs):
-    """XXX."""
-    return self.load_response(self.request("{1}", **kwargs))
-'''
-
-_verb_body_func = '''
+_mverb_func = '''
 def {0}(self, *args, **kwargs):
     """XXX."""
     return self.send_request("{1}", *args, **kwargs)
 '''
 
 class LamiumResourceMeta(type):
-    
+
     def __init__(cls, name, bases, nmspec):
         super(LamiumResourceMeta, cls).__init__(name, bases, nmspec)
         compiled = {}
@@ -94,13 +89,12 @@ class LamiumResourceMeta(type):
                 continue
             fcode = compile(_verb_func.format(verb), '<lamium_dynfunc>', 'exec')
             compiled[verb] = fcode
-        
+
         for verb in cls.__verbs__:
             mverb = verb.lower()
             if hasattr(cls, mverb):
                 continue
-            functmpl = _verb_body_func if verb in cls.__verbs_with_bodies__ else _verb_body_func
-            fcode = compile(functmpl.format(mverb, verb), '<lamium_dynfunc>', 'exec')
+            fcode = compile(_mverb_func.format(mverb, verb), '<lamium_dynfunc>', 'exec')
             compiled[mverb] = fcode
 
         ns = {}
@@ -108,11 +102,9 @@ class LamiumResourceMeta(type):
             eval(fcode, {}, ns)
             setattr(cls, method_name, ns[method_name])
 
-#del _verb_func, _verb_body_func, _verb_nobody_func
 
 class BaseResource(six.with_metaclass(LamiumResourceMeta, Unit)):
-    
-    # How do you do frozensets these days?
+
     __verbs__ = frozenset('DELETE GET HEAD PATCH POST PUT'.split())
     __verbs_with_bodies__ = frozenset('PATCH POST PUT'.split())
 
@@ -120,25 +112,47 @@ class BaseResource(six.with_metaclass(LamiumResourceMeta, Unit)):
     def URL(self):
         return URL(self.__session__, self.__url__)
 
-    def request(self, method, *args, **kwargs):
-        return self.__session__.request(method, self.__url__, *args, **kwargs)
+    def request(self, method, **kwargs):
+        # Delegate to the default dispatcher for this method. If one doesn't
+        # exist, then delegate to the request method.
+        return self.__session__.request(method, self.__url__, **kwargs)
 
     def at(self, url):
         return self.__session__.at(url)
 
-    # send_request will be defined in superclass, won't have "response" or
-    # notfound behaviour. That'll be defined by us.
     def send_request(self, method, *args, **kwargs):
-        kwargs = self._merge_request_params(*args, **kwargs)
+        kwargs = self._merge_request_params(method, *args, **kwargs)
         return self.load_response(self.request(method, **kwargs))
 
     def load_response(self, response):
         return response
 
-    def _merge_request_params(self, data=None, **kwargs):
-        if data is not None:
-            kwargs['data'] = data
+    def _merge_request_params(self, method, *args, **kwargs):
+
+        # If we're given positional arguments, then try and infer the context
+        # of what positional arguments should mean.
+        if args:
+            args = list(args)
+            # requests.GET has params as a positional argument.
+            if method == 'GET':
+                if 'params' in kwargs:
+                    raise TypeError('cannot define positional and keyword argument for "params"')
+                kwargs['params'] = args.pop(0)
+
+            # If it's a verb that usually has a body, then assume that argument
+            # is intended as a 'body' argument.
+            elif method in self.__verbs_with_bodies__:
+                if 'body' in kwargs:
+                    raise TypeError('cannot define positional and keyword argument for "body"')
+                kwargs['body'] = args.pop(0)
+
+        # If we still have positional arguments, then complain, as we don't know how to cope
+        # with it.
+        if args:
+            raise TypeError('too many positional arguments passed - use keyword arguments instead')
+
         return kwargs
+
 
 _NOTGIVEN = object()
 
@@ -148,7 +162,7 @@ class Resource(BaseResource):
         # Emulating Tortilla here.
         if args:
             return self(*args).get(**kwargs) #pylint: disable=no-member
-            
+
         return super(Resource, self).get(**kwargs) #pylint: disable=no-member
 
     def send_request(self, method, data=None, notfound=None, response=False, **kwargs):
@@ -156,7 +170,7 @@ class Resource(BaseResource):
         resp = self.request(method, **params)
         if response:
             return resp
-            
+
         try:
             return self.load_response(resp)
         except (self.exceptions.NotFound, self.exceptions.Gone):
@@ -194,8 +208,10 @@ class Session(object):
             ['request']
         )
 
-    def request(self, method, url, *args, **kwargs):
-        return self.req_sess.request(method, url, *args, **kwargs)
+    def request(self, method, url, **kwargs):
+        if method == 'HEAD':
+            kwargs.setdefault('allow_redirects', False)
+        return self.req_sess.request(method, url, **kwargs)
 
     def format_url(self, url, positionals, named):
         if not (named or positionals):
